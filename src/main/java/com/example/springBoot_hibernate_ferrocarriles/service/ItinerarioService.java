@@ -1,11 +1,13 @@
 package com.example.springBoot_hibernate_ferrocarriles.service;
 
-import java.util.ArrayList;
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
+import com.example.springBoot_hibernate_ferrocarriles.exception.ResourceNotFoundException;
 import com.example.springBoot_hibernate_ferrocarriles.model.Itinerario;
 import com.example.springBoot_hibernate_ferrocarriles.repository.ItinerarioRepository;
 
@@ -21,60 +23,36 @@ public class ItinerarioService {
 		this.itinerarioRepository = itinerarioRepository;
 	}
 	
-	public List<Itinerario> getAllItinerarios() throws Exception {
+	public List<Itinerario> getAllItinerarios() {
 		log.info("Listing all itineraries.");
-		List<Itinerario> itinerarios=new ArrayList<Itinerario>();
-		try {
-		itinerarioRepository.findAll().forEach(itinerario1->itinerarios.add(itinerario1));
-		} catch(Exception ex) {
-			System.out.println("An error has occurred: " + ex.getMessage());
-		} return itinerarios;
-		
+		List<Itinerario> itinerarios=itinerarioRepository.findAll();	
+		if(itinerarios.isEmpty()) { 
+			throw new ResourceNotFoundException("Not itineraries found.");
+		}
+		return itinerarios;		
 	}
 	
-	public Itinerario getItinerarioById(Long id) throws Exception {
+	public Itinerario getItinerarioById(Long id) {
 		log.info("Obtaining an itinerary by ID:{}", id);
-		Itinerario itinerario = new Itinerario();
-		try {
-			itinerario = itinerarioRepository.findById(id).get();
-		} catch(Exception ex) {
-			System.out.println("An error has occurred: " + ex.getMessage());
-		} return itinerario;
+		return itinerarioRepository.findById(id)
+				.orElseThrow(()-> new ResourceNotFoundException("Not found an itinerary with id="+id));
 	}
 	
-	public Itinerario addItinerario(Itinerario itinerario) throws Exception {
+	public Itinerario addItinerario(Itinerario itinerario) {
 		log.info("Adding an itinerary:{}", itinerario);
-		Itinerario itinerarioSalvado = new Itinerario();
-		try {
-			itinerarioSalvado = itinerarioRepository.save(itinerario);	
-		} catch(Exception ex) {
-			System.out.println("An error has occurred: " + ex.getMessage());
-		} return itinerarioSalvado;
+		return itinerarioRepository.save(itinerario);
 	}
 	
-	public Itinerario updateItinerario(Long id, Itinerario itinerario) throws Exception {
+	public Itinerario updateItinerario(Long id, Itinerario itinerario) throws Exception{
 		log.info("Updating an itinerary:{}", itinerario);
-		Itinerario itinerarioSalvado = new Itinerario();
-		try {
-			itinerarioSalvado = itinerarioRepository.save(itinerario);
-			Itinerario itinerary = itinerarioRepository.getReferenceById(id);
-			itinerary.setCantidadKilometros(itinerario.getCantidadKilometros());
-			itinerary.setCantidadVagones(itinerario.getCantidadVagones());
-			itinerary.setProvinciaDestino(itinerario.getProvinciaDestino());
-			itinerary.setProvinciaOrigen(itinerario.getProvinciaOrigen());
-			itinerarioSalvado = itinerarioRepository.save(itinerary);
-		} catch(Exception ex) {
-			System.out.println("An error has occurred: " + ex.getMessage());
-		} return itinerarioSalvado;
+		itinerarioRepository.findById(id).orElseThrow(()-> new ResourceNotFoundException("Not found an itinerary with id="+id));
+		return itinerarioRepository.save(itinerario);
 	}
 	
-	public void deleteItinerario(Long id) throws Exception {
+	public void deleteItinerario(Long id) {
 		log.info("Deleting an itinerary by ID:{}", id);
-		try {
-			itinerarioRepository.deleteById(id);
-		} catch(Exception ex) {
-			System.out.println("An error has occurred: " + ex.getMessage());
-		} 
+		itinerarioRepository.findById(id).orElseThrow(()-> new ResourceNotFoundException("Not found  an itinerary with id="+id));
+		itinerarioRepository.deleteById(id);		 
 	}
 	
 }

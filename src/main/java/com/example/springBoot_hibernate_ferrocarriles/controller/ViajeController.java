@@ -51,11 +51,13 @@ public class ViajeController {
 	
 	@Operation(summary = "Get all travels.", description = "Get all travels.")
     @ApiResponses(value = {
-    		@ApiResponse(responseCode = "200", description = "Successfully retrieved.")
+    		@ApiResponse(responseCode = "200", description = "Successfully retrieved."),
+    		@ApiResponse(responseCode = "404", description = "Not itineraries found.")
         })
 	@GetMapping("/travels")
-	public ResponseEntity<List<TravelDto>> getAllTravels() throws Exception {
-		List<TravelDto> listResponse = viajeService.getAllViajes().stream().map(travel -> modelMapper.map(travel, TravelDto.class)).collect(Collectors.toList());
+	public ResponseEntity<List<TravelDto>> getAllTravels() {
+		List<TravelDto> listResponse = viajeService.getAllViajes().stream()
+				.map(travel -> modelMapper.map(travel, TravelDto.class)).collect(Collectors.toList());
 		return ResponseEntity.ok().body(listResponse);
 	}
 	
@@ -66,23 +68,18 @@ public class ViajeController {
             @ApiResponse(responseCode = "404", description = "Not found - The travel was not found.")
         })
 	@GetMapping("/travels/{id}")
-	public ResponseEntity<TravelDto> getTravelById(@PathVariable("id") @Parameter(name = "id", description = "Travel id", example = "1") Long id) throws Exception {
-		Viaje travel = viajeService.getViajeById(id);
-    	TravelDto travelResponse = modelMapper.map(travel, TravelDto.class);
-    	if(travel.getNumeroViaje() != id) {
-    		return new ResponseEntity<TravelDto>(travelResponse, HttpStatus.NOT_FOUND);
-    	} else {     		
-    		return ResponseEntity.ok().body(travelResponse);
-    	}
+	public ResponseEntity<TravelDto> getTravelById(@PathVariable("id") @Parameter(name = "id", description = "Travel id", example = "1") Long id) {
+		Viaje travel = viajeService.getViajeById(id); 
+    	return ResponseEntity.ok().body(modelMapper.map(travel, TravelDto.class));
 	}
 	
 	
-	@Operation(summary = "Add a travel by id.", description = "Add a travel as per the id.")
+	@Operation(summary = "Add a travel by itinerary.", description = "Add a travel as per the itinerary.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Successfully created.") 
         })
 	@PostMapping("/travels")
-	public ResponseEntity<TravelDto> addTravel(@Valid @RequestBody @Parameter(name = "itinerary", description = "Itinerary for the travel that will add.") ItineraryDto itineraryDto) throws Exception {	
+	public ResponseEntity<TravelDto> addTravel(@Valid @RequestBody @Parameter(name = "itinerary", description = "Itinerary for the travel that will add.") ItineraryDto itineraryDto) {	
 		Itinerario itineraryRequest = modelMapper.map(itineraryDto, Itinerario.class);
 		Viaje travel = viajeService.addViaje(itineraryRequest);
 		TravelDto travelResponse = modelMapper.map(travel, TravelDto.class);
@@ -96,17 +93,14 @@ public class ViajeController {
 	            @ApiResponse(responseCode = "400", description = "Bad Request.")
 	        })
 	@PutMapping("/travels/{id}")
-	public ResponseEntity<TravelDto> updateTravel(@Valid @PathVariable("id") @Parameter(name = "id", description = "Travel's number", example = "1") int numeroViaje, @RequestBody @Parameter(name = "itinerary", description = "Travel's itinerary") ItineraryDto itineraryDto, @Parameter(name = "traction equipment", description = "Travel's traction equipment") TractionEquipmentDto tractionEquipmentDto ) throws Exception {
-    	Viaje travel = viajeService.getViajeById((long)numeroViaje);
-    	if(travel.getNumeroViaje() != numeroViaje) {
-    		return new ResponseEntity<TravelDto>(modelMapper.map(travel, TravelDto.class), HttpStatus.BAD_REQUEST);
-    	} else {    	
-	    	Itinerario itineraryRequest = modelMapper.map(itineraryDto, Itinerario.class);
-	    	EquipoDeTraccion tractionEquipmentRequest = modelMapper.map(tractionEquipmentDto, EquipoDeTraccion.class);
-	    	Viaje travelUpdated = viajeService.updateViaje((long)numeroViaje, itineraryRequest, tractionEquipmentRequest);
-	    	TravelDto travelResponse = modelMapper.map(travelUpdated, TravelDto.class);
-	    	return ResponseEntity.ok().body(travelResponse);
-    	}
+	public ResponseEntity<TravelDto> updateTravel(@Valid @PathVariable("id") @Parameter(name = "id", description = "Travel's number", example = "1") int numeroViaje, 
+			@RequestBody @Parameter(name = "itinerary", description = "Travel's itinerary") ItineraryDto itineraryDto, 
+			@Parameter(name = "traction equipment", description = "Travel's traction equipment") TractionEquipmentDto tractionEquipmentDto )  {
+		Itinerario itineraryRequest = modelMapper.map(itineraryDto, Itinerario.class);
+		EquipoDeTraccion equipoRequest = modelMapper.map(tractionEquipmentDto, EquipoDeTraccion.class);
+		Viaje travel = viajeService.updateViaje(numeroViaje, itineraryRequest, equipoRequest);
+		TravelDto travelResponse = modelMapper.map(travel, TravelDto.class);
+		return ResponseEntity.ok().body(travelResponse);
 	}
 	
 	 
@@ -116,14 +110,9 @@ public class ViajeController {
 	            @ApiResponse(responseCode = "404", description = "Not found - The itinerary was not found.")
 	        })
 	@DeleteMapping("/travels/{id}")
-	public ResponseEntity<String> deleteTravel(@PathVariable("id") @Parameter(name = "id", description = "Travel id", example = "1") Long id) throws Exception {
-		Viaje travel = viajeService.getViajeById(id);
-    	if(travel.getNumeroViaje() != id) {
-    		return new ResponseEntity<String>("Travel not found.", HttpStatus.NOT_FOUND);
-    	} else {
-    		viajeService.deleteViaje(id);
-	    	return new ResponseEntity<String>("Travel deleted successfully", HttpStatus.OK);
-    	}
+	public ResponseEntity<String> deleteTravel(@PathVariable("id") @Parameter(name = "id", description = "Travel id", example = "1") Long id) {
+		viajeService.deleteViaje(id);
+	    return new ResponseEntity<String>("Travel deleted successfully", HttpStatus.OK);
 	}
 
 }
