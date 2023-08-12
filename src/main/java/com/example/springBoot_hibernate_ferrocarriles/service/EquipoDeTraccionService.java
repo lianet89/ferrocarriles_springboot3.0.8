@@ -2,11 +2,11 @@ package com.example.springBoot_hibernate_ferrocarriles.service;
 
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.example.springBoot_hibernate_ferrocarriles.exception.ResourceNotFoundException;
 import com.example.springBoot_hibernate_ferrocarriles.model.EquipoDeTraccion;
 import com.example.springBoot_hibernate_ferrocarriles.repository.EquipoDeTraccionRepository;
 
@@ -23,43 +23,36 @@ public class EquipoDeTraccionService {
 		this.equipoDeTraccionRepository = equipoDeTraccionRepository;
 	}
 	
-	public List<EquipoDeTraccion> getAllEquipoDeTraccion() throws Exception {
+	public List<EquipoDeTraccion> getAllEquipoDeTraccion() {
 		log.info("Listing all traction equipment.");
-		List<EquipoDeTraccion> equiposDeTraccion = new ArrayList<EquipoDeTraccion>();
-		try {
-			equipoDeTraccionRepository.findAll().forEach(equipoDeTraccion1->equiposDeTraccion.add(equipoDeTraccion1));
-		} catch(Exception ex) {
-			System.out.println("An error has occurred: " + ex.getMessage());
-		} return equiposDeTraccion;		
+		List<EquipoDeTraccion> equiposDeTraccion = equipoDeTraccionRepository.findAll();		
+		if(equiposDeTraccion.isEmpty()) { 
+			throw new ResourceNotFoundException("Not traction equipments found.");
+		}
+		return equiposDeTraccion;		
 	}
 	
-	public EquipoDeTraccion getEquipoDeTraccionById(Long id) throws Exception {
+	public EquipoDeTraccion getEquipoDeTraccionById(Long id) {
 		log.info("Obtainig a traction equipment by ID:{}", id);	
-		return equipoDeTraccionRepository.findById(id).get();
+		return equipoDeTraccionRepository.findById(id)
+				.orElseThrow(()-> new ResourceNotFoundException("Not found a traction equipment with id="+id));
 	}
 	
-	public EquipoDeTraccion addEquipoDeTraccion(EquipoDeTraccion equipoDeTraccion) throws Exception {
+	public EquipoDeTraccion addEquipoDeTraccion(EquipoDeTraccion equipoDeTraccion) {
 		log.info("Adding a traction equipment:{}", equipoDeTraccion);
 		return equipoDeTraccionRepository.save(equipoDeTraccion);
 	}
 	
-	public EquipoDeTraccion updateEquipoDeTraccion(Long id, EquipoDeTraccion equipoDeTraccion) throws Exception {
+	public EquipoDeTraccion updateEquipoDeTraccion(Long id, EquipoDeTraccion equipoDeTraccion) {
 		log.info("Updating a traction equipment:{}", id);
-		EquipoDeTraccion tractionEquipment = equipoDeTraccionRepository.getReferenceById(id);
-		tractionEquipment.setKilometrajeRecorrido(equipoDeTraccion.getKilometrajeRecorrido());
-		tractionEquipment.setLineaDeTrenes(equipoDeTraccion.getLineaDeTrenes());
-		tractionEquipment.setPotenciaMotor(equipoDeTraccion.getPotenciaMotor());						
-		EquipoDeTraccion tractionEquipmentSaved = equipoDeTraccionRepository.save(tractionEquipment);
-		return tractionEquipmentSaved;
+		equipoDeTraccionRepository.findById(id).orElseThrow(()-> new ResourceNotFoundException("Not found a traction equipment with id="+id));
+		return equipoDeTraccionRepository.save(equipoDeTraccion);
 	}
 	
-	public void deleteEquipoDeTraccion(Long id) throws Exception {
+	public void deleteEquipoDeTraccion(Long id) {
 		log.info("Deleting a traction equipment:{}", id);
-		try {
-			equipoDeTraccionRepository.deleteById(id);
-		} catch(Exception ex) {
-			System.out.println("An error has occurred: " + ex.getMessage());
-		}
+		equipoDeTraccionRepository.findById(id).orElseThrow(()-> new ResourceNotFoundException("Not found a traction equipment with id="+id));
+		equipoDeTraccionRepository.deleteById(id);	
 	}
 
 }
