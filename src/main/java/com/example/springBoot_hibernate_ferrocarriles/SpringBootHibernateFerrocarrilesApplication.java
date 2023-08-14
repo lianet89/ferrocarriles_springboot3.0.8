@@ -3,6 +3,7 @@ package com.example.springBoot_hibernate_ferrocarriles;
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+
 import org.springframework.context.annotation.Bean;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
@@ -17,9 +18,9 @@ public class SpringBootHibernateFerrocarrilesApplication {
 	ModelMapper modelMapper() {
 		return new ModelMapper();
 	}
-
+	
 	public static void main(String[] args) {
-		SpringApplication.run(SpringBootHibernateFerrocarrilesApplication.class, args);
+		SpringApplication.run(SpringBootHibernateFerrocarrilesApplication.class, args);		
 	}
-
+	
 }

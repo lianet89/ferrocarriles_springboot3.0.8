@@ -3,6 +3,8 @@ package com.example.springBoot_hibernate_ferrocarriles.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.example.springBoot_hibernate_ferrocarriles.exception.ResourceNotFoundException;
@@ -21,6 +23,7 @@ public class LocomotoraService {
 		this.locomotoraRepository = locomotoraRepository;
 	}
 	
+	@CachePut(value = "locomotives")
 	public List<Locomotora> getAllLocomotora() {
 		log.info("Listing all locomotives.");
 		List<Locomotora> locomotives = locomotoraRepository.findAll();		 
@@ -30,6 +33,7 @@ public class LocomotoraService {
 		return locomotives;
 	}
 	
+	@Cacheable(value = "locomotive")
 	public Locomotora getLocomotoraById(Long id) {
 		log.info("Obtainig a locomotive by ID:", id);
 		return locomotoraRepository.findById(id)

@@ -5,6 +5,8 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.example.springBoot_hibernate_ferrocarriles.exception.ResourceNotFoundException;
@@ -27,7 +29,8 @@ public class ViajeService {
 		this.viajeRepository = viajeRepository;		
 		this.equipoDeTraccionService = equipoDeTraccionService;
 	}
-
+	
+	@CachePut(value = "travels")
 	public List<Viaje> getAllViajes() {
 		log.info("Listing all travels.");
 		List<Viaje> viajes = viajeRepository.findAll();
@@ -37,6 +40,7 @@ public class ViajeService {
 		 return viajes;		
 	}
 	
+	@Cacheable(value = "travel")
 	public Viaje getViajeById(Long idViaje) {
 		log.info("Obtainig a travel by ID:", idViaje);
 		return viajeRepository.findById(idViaje)

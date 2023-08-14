@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.example.springBoot_hibernate_ferrocarriles.exception.ResourceNotFoundException;
@@ -30,7 +31,7 @@ public class ReportesService {
 		this.locomotoraService = locomotoraService;
 	}
 	
-	
+	@Cacheable(value = "tractionEquipmentsForItinerary")
 	public List<EquipoDeTraccion> equiposAptosParaItinerario(int id) {
 		log.info("Listing the traction equipments that can cover the itinerary with ID:{}", id);
 		List<EquipoDeTraccion> equiposAptosParaItinerario = new ArrayList<>();
@@ -46,7 +47,7 @@ public class ReportesService {
 		return equiposAptosParaItinerario;
 	}
 	
-
+	@Cacheable(value = "locomotivesOfBrand")
 	public List<Locomotora> locomotorasDeMarca(String marca) {
 		log.info("Listing the locomotives that are of the brand:{}", marca);
 		List<Locomotora> locomotorasDeMarca = new ArrayList<>();
@@ -64,7 +65,7 @@ public class ReportesService {
         Collections.reverse(locomotorasDeMarca);	
         return locomotorasDeMarca;
 	}
-	
+		
 	public void findDestinations(List<Itinerario> listaItinerarios, List<String> listaAuxiliar, int cantidadTemporal, int i) {
 		log.info("Listing the itineraries that have the same destination of the itinerary:{}", i);
 		
@@ -86,6 +87,7 @@ public class ReportesService {
 		}
 	}
 	
+	@Cacheable(value = "originMoreDestinations")
 	public String originMoreDestinations() {
 		log.info("Obtaining the origin province that have more destinations.");
 		
@@ -154,7 +156,8 @@ public class ReportesService {
 			}
 		return combination;
 	}
-		
+	
+	@Cacheable(value = "combinationToCoverItinerary")
 	public String coverItinerary(int id) {
 		log.info("Obtaining the combination of itineraries that can cover the itinerary:{}", id);		
 		Itinerario temporalItinerary = new Itinerario();

@@ -10,8 +10,10 @@ import javax.xml.validation.Validator;
 import org.modelmapper.ModelMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
+import com.example.springBoot_hibernate_ferrocarriles.cache.SpringCachingConfig;
 import com.example.springBoot_hibernate_ferrocarriles.dto.ItineraryDto;
 import com.example.springBoot_hibernate_ferrocarriles.model.Itinerario;
 import com.example.springBoot_hibernate_ferrocarriles.service.ItinerarioService;
@@ -44,8 +47,7 @@ public class ItinerarioController {
     ItinerarioService itinerarioService;   
     
     @Autowired
-	ModelMapper modelMapper;
-    
+	ModelMapper modelMapper;    
     
     @Operation(summary = "Get all itineraries.", description = "Get all itineraries.")
     @ApiResponses(value = {
@@ -56,7 +58,7 @@ public class ItinerarioController {
     private ResponseEntity<List<ItineraryDto>> getAllItinerarios() {
     	List<ItineraryDto> listResponse = itinerarioService.getAllItinerarios().stream()
     			.map(itineraties -> modelMapper.map(itineraties, ItineraryDto.class)).collect(Collectors.toList());
-    	return ResponseEntity.ok().body(listResponse);
+    	return ResponseEntity.ok().body(listResponse);    	
     }
     
     

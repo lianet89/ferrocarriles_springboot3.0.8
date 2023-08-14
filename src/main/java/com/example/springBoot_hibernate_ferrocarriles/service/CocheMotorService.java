@@ -2,11 +2,15 @@ package com.example.springBoot_hibernate_ferrocarriles.service;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.example.springBoot_hibernate_ferrocarriles.exception.ResourceNotFoundException;
 import com.example.springBoot_hibernate_ferrocarriles.model.CocheMotor;
 import com.example.springBoot_hibernate_ferrocarriles.repository.CocheMotorRepository;
+
+
 
 import java.util.List;
 
@@ -21,7 +25,7 @@ public class CocheMotorService {
 	public CocheMotorService(final CocheMotorRepository cocheMotorRepositoy) {
 		this.cocheMotorRepository = cocheMotorRepositoy;
 	}
-	
+	@CachePut(value = "motorCars")
 	public List<CocheMotor> getAllCocheMotor() {
 		log.info("Listing all motor-car.");
 		List<CocheMotor> cochesMotor = cocheMotorRepository.findAll();	
@@ -31,6 +35,7 @@ public class CocheMotorService {
 		return cochesMotor;
 	}
 	
+	@Cacheable(value = "motorCar")
 	public CocheMotor getCocheMotorById(Long id) {
 		log.info("Obtainig a motor-car by ID:{}", id);
 		return cocheMotorRepository.findById(id)

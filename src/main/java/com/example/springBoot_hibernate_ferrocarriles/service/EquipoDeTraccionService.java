@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 
 import com.example.springBoot_hibernate_ferrocarriles.exception.ResourceNotFoundException;
 import com.example.springBoot_hibernate_ferrocarriles.model.EquipoDeTraccion;
@@ -22,7 +24,7 @@ public class EquipoDeTraccionService {
 	public EquipoDeTraccionService(final EquipoDeTraccionRepository equipoDeTraccionRepository) {
 		this.equipoDeTraccionRepository = equipoDeTraccionRepository;
 	}
-	
+	@CachePut(value = "tractionEquipments")
 	public List<EquipoDeTraccion> getAllEquipoDeTraccion() {
 		log.info("Listing all traction equipment.");
 		List<EquipoDeTraccion> equiposDeTraccion = equipoDeTraccionRepository.findAll();		
@@ -32,6 +34,7 @@ public class EquipoDeTraccionService {
 		return equiposDeTraccion;		
 	}
 	
+	@Cacheable(value = "tractionEquipment")
 	public EquipoDeTraccion getEquipoDeTraccionById(Long id) {
 		log.info("Obtainig a traction equipment by ID:{}", id);	
 		return equipoDeTraccionRepository.findById(id)

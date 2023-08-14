@@ -4,6 +4,8 @@ package com.example.springBoot_hibernate_ferrocarriles.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
@@ -22,7 +24,7 @@ public class ItinerarioService {
 	public ItinerarioService(final ItinerarioRepository itinerarioRepository) {
 		this.itinerarioRepository = itinerarioRepository;
 	}
-	
+	@CachePut(value = "itineraries")
 	public List<Itinerario> getAllItinerarios() {
 		log.info("Listing all itineraries.");
 		List<Itinerario> itinerarios=itinerarioRepository.findAll();	
@@ -32,6 +34,7 @@ public class ItinerarioService {
 		return itinerarios;		
 	}
 	
+	@Cacheable(value = "itinerary")
 	public Itinerario getItinerarioById(Long id) {
 		log.info("Obtaining an itinerary by ID:{}", id);
 		return itinerarioRepository.findById(id)
