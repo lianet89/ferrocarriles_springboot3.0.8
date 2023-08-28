@@ -48,7 +48,7 @@ public class ControllerExceptionHandler {
 		 for (FieldError error:errors) {
 			 message = " " + error.getDefaultMessage();
 		 }
-		ErrorMessage message2 = new ErrorMessage(HttpStatus.INTERNAL_SERVER_ERROR.value(), LocalDateTime.now(), ex.getMessage(), message);
+		ErrorMessage message2 = new ErrorMessage(HttpStatus.BAD_REQUEST.value(), LocalDateTime.now(), ex.getMessage(), message);
 		return new ResponseEntity<ErrorMessage>(message2, HttpStatus.BAD_REQUEST);
 	}	
 	

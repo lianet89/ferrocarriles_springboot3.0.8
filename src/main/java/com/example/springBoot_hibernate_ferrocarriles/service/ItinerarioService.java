@@ -24,6 +24,7 @@ public class ItinerarioService {
 	public ItinerarioService(final ItinerarioRepository itinerarioRepository) {
 		this.itinerarioRepository = itinerarioRepository;
 	}
+	
 	@CachePut(value = "itineraries")
 	public List<Itinerario> getAllItinerarios() {
 		log.info("Listing all itineraries.");
