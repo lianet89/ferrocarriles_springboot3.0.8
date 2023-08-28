@@ -17,8 +17,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.springBoot_hibernate_ferrocarriles.dto.LocomotiveDto;
-import com.example.springBoot_hibernate_ferrocarriles.dto.MotorCarDto;
-import com.example.springBoot_hibernate_ferrocarriles.model.CocheMotor;
 import com.example.springBoot_hibernate_ferrocarriles.model.Locomotora;
 import com.example.springBoot_hibernate_ferrocarriles.service.LocomotoraService;
 
@@ -41,7 +39,8 @@ public class LocomotoraController {
 	
 	 @Operation(summary = "Get all locomotives.", description = "Get all locomotives.")
 	    @ApiResponses(value = {
-	    		@ApiResponse(responseCode = "200", description = "Successfully retrieved.")
+	    		@ApiResponse(responseCode = "200", description = "Successfully retrieved."),
+	    		@ApiResponse(responseCode = "404", description = "Not itineraries found.")
 	        })
 	@GetMapping("/locomotives")
 	public ResponseEntity<List<LocomotiveDto>> getAllLocomotoras() throws Exception {
@@ -58,13 +57,7 @@ public class LocomotoraController {
 	@GetMapping("/locomotives/{id}")
 	public ResponseEntity<LocomotiveDto> getLocomotoraById(@PathVariable("id") @Parameter(name = "id", description = "Locomotive id", example = "1") Long id) throws Exception {
 		Locomotora locomotive = locomotoraService.getLocomotoraById(id);
-		LocomotiveDto locomotiveResponse = modelMapper.map(locomotive, LocomotiveDto.class); 
-    	if(locomotive.getNumeroIdentificacion() != id) {
-    		return new ResponseEntity<LocomotiveDto>(locomotiveResponse, HttpStatus.NOT_FOUND);
-    	} else {     		
-    		return ResponseEntity.ok().body(locomotiveResponse);
-    	}
-		
+		return ResponseEntity.ok().body(modelMapper.map(locomotive, LocomotiveDto.class));    	
 	}
 	 
 	
@@ -88,15 +81,10 @@ public class LocomotoraController {
 	        })
 	@PutMapping("/locomotives/{id}")
 	public ResponseEntity<LocomotiveDto> updateLocomotora( @Valid @PathVariable("id") @Parameter(name = "id", description = "Locomotive id", example = "1") Long id, @RequestBody @Parameter(name = "locomotive", description = "Locomotive properties") LocomotiveDto locomotiveDto) throws Exception {
-		Locomotora locomotive = locomotoraService.getLocomotoraById(id);
-    	if(locomotive.getNumeroIdentificacion() != id) {
-    		return new ResponseEntity<LocomotiveDto>(modelMapper.map(locomotive, LocomotiveDto.class), HttpStatus.BAD_REQUEST);
-    	} else {    	
-    		Locomotora locomotiveRequest = modelMapper.map(locomotiveDto, Locomotora.class);
-    		Locomotora locomotiveUpdated = locomotoraService.updateLocomotora(id, locomotiveRequest);
-	    	LocomotiveDto locomotiveResponse = modelMapper.map(locomotiveUpdated, LocomotiveDto.class);
-	    	return ResponseEntity.ok().body(locomotiveResponse);
-    	}
+		Locomotora locomotiveRequest = modelMapper.map(locomotiveDto, Locomotora.class);
+    	Locomotora locomotiveUpdated = locomotoraService.updateLocomotora(id, locomotiveRequest);
+	    LocomotiveDto locomotiveResponse = modelMapper.map(locomotiveUpdated, LocomotiveDto.class);
+	    return ResponseEntity.ok().body(locomotiveResponse);    	
 	}
 	
 	 
@@ -107,13 +95,8 @@ public class LocomotoraController {
 	        })
 	@DeleteMapping("/locomotives/{id}")
 	public ResponseEntity<String> deleteLocomotora(@PathVariable("id") @Parameter(name = "id", description = "Locomotive id", example = "1") Long id) throws Exception {
-		Locomotora locomotive = locomotoraService.getLocomotoraById(id);
-    	if(locomotive.getNumeroIdentificacion() != id) {
-    		return new ResponseEntity<String>("Locomotive not found.", HttpStatus.NOT_FOUND);
-    	} else {
-    		locomotoraService.deleteLocomotora(id);
-	    	return new ResponseEntity<String>("Locomotive deleted successfully", HttpStatus.OK);
-    	}
+		locomotoraService.deleteLocomotora(id);
+	    return new ResponseEntity<String>("Locomotive deleted successfully", HttpStatus.OK);    	
 	}
 
 }

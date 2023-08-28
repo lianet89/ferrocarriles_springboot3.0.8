@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
 import jakarta.validation.Valid;
 
 @RestController
@@ -39,29 +40,25 @@ public class CocheMotorController {
 	
 	 @Operation(summary = "Get all motor cars.", description = "Get all motor cars.")
 	    @ApiResponses(value = {
-	    		@ApiResponse(responseCode = "200", description = "Successfully retrieved.")
+	    		@ApiResponse(responseCode = "200", description = "Successfully retrieved."),
+	    		@ApiResponse(responseCode = "404", description = "Not motor-cars found.")
 	        })
 	@GetMapping("/motor-cars")
-    private ResponseEntity<List<MotorCarDto>> getAllCocheSMotor() throws Exception {
+    private ResponseEntity<List<MotorCarDto>> getAllCocheSMotor() {
 		List<MotorCarDto> listResponse = cocheMotorService.getAllCocheMotor().stream().map(motorCar -> modelMapper.map(motorCar, MotorCarDto.class)).collect(Collectors.toList());
 		return ResponseEntity.ok().body(listResponse);
     }
 	 
-	     
+	  
 	 @Operation(summary = "Get a motor car by id.", description = "Getting a motor car as per the id.")
 	    @ApiResponses(value = {
 	    		@ApiResponse(responseCode = "200", description = "Successfully retrieved."), 
 	            @ApiResponse(responseCode = "404", description = "Not found - The motor car was not found.")
 	        })
     @GetMapping("/motor-cars/{id}")
-    private ResponseEntity<MotorCarDto> getCocheMotorById(@PathVariable("id") @Parameter(name = "id", description = "Motor car id", example = "1") Long id) throws Exception {
-    	CocheMotor motorCar = cocheMotorService.getCocheMotorById(id);
-    	MotorCarDto motorCarResponse = modelMapper.map(motorCar, MotorCarDto.class);
-    	if(motorCar.getNumeroIdentificacion() != id) {
-    		return new ResponseEntity<MotorCarDto>(motorCarResponse, HttpStatus.NOT_FOUND);
-    	} else {     		
-    		return ResponseEntity.ok().body(motorCarResponse);
-    	}
+    private ResponseEntity<MotorCarDto> getCocheMotorById(@PathVariable("id") @Parameter(name = "id", description = "Motor car id", example = "1") Long id) {
+    	CocheMotor motorCarResponse = cocheMotorService.getCocheMotorById(id);
+    	return ResponseEntity.ok().body(modelMapper.map(motorCarResponse, MotorCarDto.class));    	
     }   
 	 
 	 
@@ -70,7 +67,7 @@ public class CocheMotorController {
 	            @ApiResponse(responseCode = "201", description = "Successfully created.") 
 	        })         
     @PostMapping("/motor-cars")
-    private ResponseEntity<MotorCarDto> addCocheMotor(@Valid @RequestBody @Parameter(name = "itinerary", description = "Motor car to add.") MotorCarDto motorCarDto) throws Exception {
+    private ResponseEntity<MotorCarDto> addCocheMotor(@Valid @RequestBody @Parameter(name = "itinerary", description = "Motor car to add.") MotorCarDto motorCarDto) {
     	CocheMotor motorCarRequest = modelMapper.map(motorCarDto, CocheMotor.class);
     	CocheMotor motorCar = cocheMotorService.addCocheMotor(motorCarRequest);
     	MotorCarDto motorCarResponse = modelMapper.map(motorCar, MotorCarDto.class);
@@ -83,16 +80,12 @@ public class CocheMotorController {
 	            @ApiResponse(responseCode = "400", description = "Bad Request.")
 	        })
     @PutMapping("/motor-cars/{id}")
-    private ResponseEntity<MotorCarDto> updateCocheMotor(@Valid @PathVariable("id") @Parameter(name = "id", description = "Motor car id", example = "1") Long id, @RequestBody @Parameter(name = "Motor car", description = "Motor car properties") MotorCarDto motorCarDto) throws Exception {
-    	CocheMotor motorCar = cocheMotorService.getCocheMotorById(id);
-    	if(motorCar.getNumeroIdentificacion() != id) {
-    		return new ResponseEntity<MotorCarDto>(modelMapper.map(motorCar, MotorCarDto.class), HttpStatus.BAD_REQUEST);
-    	} else {    	
-	    	CocheMotor motorCarRequest = modelMapper.map(motorCarDto, CocheMotor.class);
-	    	CocheMotor motorCarUpdated = cocheMotorService.updateCocheMotor(id, motorCarRequest);
-	    	MotorCarDto motorCarResponse = modelMapper.map(motorCarUpdated, MotorCarDto.class);
-	    	return ResponseEntity.ok().body(motorCarResponse);
-    	}
+    private ResponseEntity<MotorCarDto> updateCocheMotor(@Valid @PathVariable("id") @Parameter(name = "id", description = "Motor car id", example = "1") Long id, @RequestBody @Parameter(name = "Motor car", description = "Motor car properties") MotorCarDto motorCarDto) {
+    	CocheMotor motorCarRequest = modelMapper.map(motorCarDto, CocheMotor.class);
+	    CocheMotor motorCarUpdated = cocheMotorService.updateCocheMotor(id, motorCarRequest);
+	    MotorCarDto motorCarResponse = modelMapper.map(motorCarUpdated, MotorCarDto.class);
+	    return ResponseEntity.ok().body(motorCarResponse);
+    	
     }
 	
 	 @Operation(summary = "Delete a motor car by id", description = "Delete a motor car as per the id.")
@@ -101,15 +94,10 @@ public class CocheMotorController {
 	            @ApiResponse(responseCode = "404", description = "Not found - The motor car was not found.")
 	        })
     @DeleteMapping("/motor-cars/{id}")
-    private ResponseEntity<String> deleteCocheMotor(@PathVariable("id") @Parameter(name = "id", description = "Motor car id", example = "1") Long id) throws Exception {
-    	CocheMotor coche = cocheMotorService.getCocheMotorById(id);
-    	if(coche.getNumeroIdentificacion() != id) {
-    		return new ResponseEntity<String>("Motor car not found.", HttpStatus.NOT_FOUND);
-    	} else {
-	    	cocheMotorService.deleteCocheMotor(id);
-	    	return new ResponseEntity<String>("Motor car deleted successfully", HttpStatus.OK);
-    	}
+    private ResponseEntity<String> deleteCocheMotor(@PathVariable("id") @Parameter(name = "id", description = "Motor car id", example = "1") Long id) {
+    	cocheMotorService.deleteCocheMotor(id);
+	    return new ResponseEntity<String>("Motor car deleted successfully", HttpStatus.OK);
     }
+    
 	
-
 }

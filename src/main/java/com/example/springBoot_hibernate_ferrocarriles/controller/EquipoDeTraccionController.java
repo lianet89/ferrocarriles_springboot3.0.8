@@ -17,9 +17,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 
-import com.example.springBoot_hibernate_ferrocarriles.dto.MotorCarDto;
 import com.example.springBoot_hibernate_ferrocarriles.dto.TractionEquipmentDto;
 import com.example.springBoot_hibernate_ferrocarriles.model.EquipoDeTraccion;
 
@@ -38,10 +36,11 @@ public class EquipoDeTraccionController {
 	
 	@Operation(summary = "Get all traction equipments.", description = "Get all traction equipments.")
     @ApiResponses(value = {
-    		@ApiResponse(responseCode = "200", description = "Successfully retrieved.")
+    		@ApiResponse(responseCode = "200", description = "Successfully retrieved."),
+    		@ApiResponse(responseCode = "404", description = "Not traction equipments found.")
         })
 	@GetMapping("/traction-equipments")
-	public ResponseEntity<List<TractionEquipmentDto>> getAllEquipoDeTraccion() throws Exception {
+	public ResponseEntity<List<TractionEquipmentDto>> getAllEquipoDeTraccion() {
 		List<TractionEquipmentDto> listResponse = equipoDeTraccionService.getAllEquipoDeTraccion().stream().map(tractionEquipment -> modelMapper.map(tractionEquipment, TractionEquipmentDto.class)).collect(Collectors.toList());
 		return ResponseEntity.ok().body(listResponse);
 	}
@@ -53,14 +52,9 @@ public class EquipoDeTraccionController {
             @ApiResponse(responseCode = "404", description = "Not found - The traction equipment was not found.")
         })
 	@GetMapping("/traction-equipments/{id}")
-	public ResponseEntity<TractionEquipmentDto> getEquipoDeTraccionById(@PathVariable("id") @Parameter(name = "id", description = "Traction equipment id", example = "1") Long id) throws Exception {
-		EquipoDeTraccion tractionEquipmentRequest = equipoDeTraccionService.getEquipoDeTraccionById(id);
-		TractionEquipmentDto tractionEquipmentResponse = modelMapper.map(tractionEquipmentRequest, TractionEquipmentDto.class);
-		if(tractionEquipmentRequest.getNumeroIdentificacion() != id) {
-    		return new ResponseEntity<TractionEquipmentDto>( tractionEquipmentResponse, HttpStatus.NOT_FOUND);
-    	} else {     		
-    		return ResponseEntity.ok().body(tractionEquipmentResponse);
-    	}		
+	public ResponseEntity<TractionEquipmentDto> getEquipoDeTraccionById(@PathVariable("id") @Parameter(name = "id", description = "Traction equipment id", example = "1") Long id) {
+		EquipoDeTraccion tractionEquipment = equipoDeTraccionService.getEquipoDeTraccionById(id); 
+    	return ResponseEntity.ok().body(modelMapper.map(tractionEquipment, TractionEquipmentDto.class));		
 	}
 	
 	/*
@@ -87,15 +81,9 @@ public class EquipoDeTraccionController {
             @ApiResponse(responseCode = "404", description = "Not found - The traction equipment was not found.")
         })
 	@DeleteMapping("/traction-equipments/{id}")
-	public ResponseEntity<String> deleteEquipoDeTraccion(@PathVariable("id") @Parameter(name = "id", description = "Traction equipment id", example = "1") Long id) throws Exception {
-		EquipoDeTraccion tractionEquipment = equipoDeTraccionService.getEquipoDeTraccionById(id);
-		if(tractionEquipment.getNumeroIdentificacion() != id) {
-    		return new ResponseEntity<String>("Traction equipment not found.", HttpStatus.NOT_FOUND);
-    	} else {
-    		equipoDeTraccionService.deleteEquipoDeTraccion(id);
-	    	return new ResponseEntity<String>("Traction equipment deleted successfully", HttpStatus.OK);
-    	}
-		
+	public ResponseEntity<String> deleteEquipoDeTraccion(@PathVariable("id") @Parameter(name = "id", description = "Traction equipment id", example = "1") Long id) {
+		equipoDeTraccionService.deleteEquipoDeTraccion(id);
+	    return new ResponseEntity<String>("Traction equipment deleted successfully", HttpStatus.OK);    	
 	}
 
 }

@@ -1,11 +1,13 @@
 package com.example.springBoot_hibernate_ferrocarriles.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import com.example.springBoot_hibernate_ferrocarriles.exception.ResourceNotFoundException;
 import com.example.springBoot_hibernate_ferrocarriles.model.Locomotora;
 import com.example.springBoot_hibernate_ferrocarriles.repository.LocomotoraRepository;
 
@@ -21,59 +23,37 @@ public class LocomotoraService {
 		this.locomotoraRepository = locomotoraRepository;
 	}
 	
-	public List<Locomotora> getAllLocomotora() throws Exception {
+	@CachePut(value = "locomotives")
+	public List<Locomotora> getAllLocomotora() {
 		log.info("Listing all locomotives.");
-		List<Locomotora> locomotoras = new ArrayList<Locomotora>();
-		try {
-			locomotoraRepository.findAll().forEach(locomotora1->locomotoras.add(locomotora1));
-		} catch(Exception ex) {
-			System.out.println("An error has occurred: " + ex.getMessage());
-		} 
-		return locomotoras;
-	}
-	
-	public Locomotora getLocomotoraById(Long id) throws Exception {
-		log.info("Obtainig a locomotive by ID:", id);
-		Locomotora locomotora = new Locomotora ();
-		try {
-			locomotora = locomotoraRepository.findById(id).get();	
-		} catch(Exception ex) {
-			System.out.println("An error has occurred: " + ex.getMessage());
-		} return locomotora;
-	}
-	
-	public Locomotora addLocomotora(Locomotora locomotora) throws Exception {
-		log.info("Adding a locomotive:{}", locomotora);
-		Locomotora locomotoraSalvada = new Locomotora ();
-		try {
-			locomotoraSalvada = locomotoraRepository.save(locomotora);
-		} catch(Exception ex) {
-			System.out.println("An error has occurred: " + ex.getMessage());
-		} return locomotoraSalvada;
-	}
-	
-	public Locomotora updateLocomotora(Long id, Locomotora locomotora) throws Exception {
-		log.info("Adding a locomotive:{}", locomotora);
-		Locomotora locomotoraSalvada = new Locomotora ();
-		try {
-			Locomotora locomotive = locomotoraRepository.getReferenceById(id);
-			locomotive.setMarcaFabricante(locomotora.getMarcaFabricante());
-			locomotive.setKilometrajeRecorrido(locomotora.getKilometrajeRecorrido());
-			locomotive.setLineaDeTrenes(locomotora.getLineaDeTrenes());
-			locomotive.setPotenciaMotor(locomotora.getPotenciaMotor());						
-			locomotoraSalvada = locomotoraRepository.save(locomotive);
-			
-		} catch(Exception ex) {
-			System.out.println("An error has occurred: " + ex.getMessage());
-		} return locomotoraSalvada;
-	}
-	
-	public void deleteLocomotora(Long id) throws Exception {
-		log.info("Deleting a locomotive:{}", id);
-		try {
-			locomotoraRepository.deleteById(id);
-		} catch(Exception ex) {
-			System.out.println("An error has occurred: " + ex.getMessage());
+		List<Locomotora> locomotives = locomotoraRepository.findAll();		 
+		if(locomotives.isEmpty()) { 
+			throw new ResourceNotFoundException("Not locomotives found.");
 		}
+		return locomotives;
+	}
+	
+	@Cacheable(value = "locomotive")
+	public Locomotora getLocomotoraById(Long id) {
+		log.info("Obtainig a locomotive by ID:", id);
+		return locomotoraRepository.findById(id)
+				.orElseThrow(()-> new ResourceNotFoundException("Not found a locomotive with id="+id));	
+	}
+	
+	public Locomotora addLocomotora(Locomotora locomotora) {
+		log.info("Adding a locomotive:{}", locomotora);
+		return locomotoraRepository.save(locomotora);
+	}
+	
+	public Locomotora updateLocomotora(Long id, Locomotora locomotora) {
+		log.info("Adding a locomotive:{}", locomotora);
+		locomotoraRepository.findById(id).orElseThrow(()-> new ResourceNotFoundException("Not found a locomotive with id="+id));			
+		return locomotoraRepository.save(locomotora);
+	}
+	
+	public void deleteLocomotora(Long id) {
+		log.info("Deleting a locomotive:{}", id);
+		locomotoraRepository.findById(id).orElseThrow(()-> new ResourceNotFoundException("Not found a locomotive with id="+id));
+		locomotoraRepository.deleteById(id);		
 	}
 }
